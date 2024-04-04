@@ -10,9 +10,8 @@ public class MineManager : MonoBehaviour
     // Start is called before the first frame update
     public int gridSize;
     public int mineCount;
-    private float windowSize =10f;
+    public float windowSize =10f;
     public bool[,] grid;
-    public List<Vector2> grid2;
     
     [SerializeField] public GameObject[] boxs;
     

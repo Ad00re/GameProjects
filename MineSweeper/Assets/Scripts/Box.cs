@@ -7,6 +7,7 @@ public class Box : MonoBehaviour
 {
     
     public Sprite flag;
+    public Sprite boxColor;
     public bool mine;
     public int neighbour;
     public int scale;
@@ -31,6 +32,55 @@ public class Box : MonoBehaviour
             SceneManager.LoadScene("Scenes/End");
         }
     }
+    
+    (int,int) findLocation(GameObject o)
+    {
+                    
+        Regex pattern = new Regex(@"box(\d+)_(\d+)");
+        Match match = pattern.Match(o.name);
+        int x = int.Parse(match.Groups[1].Value);  
+        int y = int.Parse(match.Groups[2].Value);
+        return (x, y);
+    }
+    
+    void ChangeSpriteFlag(GameObject o)
+    {
+        o.GetComponent<SpriteRenderer>().sprite = flag;
+        o.GetComponent<SpriteRenderer>().color = Color.white;
+        o.transform.localScale = new Vector3((1024f / (scale+1)) / flag.rect.size.x,
+            (1024f / (scale+1)) / flag.rect.size.y, 1f);
+        o.GetComponent<Box>().state = 1;
+    }
+                
+    void ChangeSpriteMine(GameObject o)
+    {
+        o.GetComponent<SpriteRenderer>().sprite = flag;
+        o.GetComponent<SpriteRenderer>().color = Color.red;
+        o.transform.localScale = new Vector3((1024f / (scale+1)) / flag.rect.size.x,
+            (1024f / (scale+1)) / flag.rect.size.y, 1f);
+        o.GetComponent<Box>().state = 2;
+    }
+                
+    void ChangeSprite(GameObject o)
+    {
+        Sprite image = number[o.GetComponent<Box>().neighbour];
+        o.GetComponent<SpriteRenderer>().sprite = image;
+        o.GetComponent<SpriteRenderer>().color = Color.white;
+        o.transform.localScale = new Vector3((1024f / (scale+1)) / image.rect.size.x,
+            (1024f / (scale+1)) / image.rect.size.y, 1f);
+        o.GetComponent<Box>().state = 2;
+    }
+    
+    void ChangeSpriteReset(GameObject o)
+    {
+        Sprite image = boxColor;
+        o.GetComponent<SpriteRenderer>().sprite = image;
+        o.GetComponent<SpriteRenderer>().color = Color.white;
+        o.transform.localScale = new Vector3((1024f / (scale+1)) / image.rect.size.x,
+            (1024f / (scale+1)) / image.rect.size.y, 1f);
+        o.GetComponent<Box>().state = 0;
+    }
+
     public void ClickOn()
     {
         GameObject self = GameObject.Find(name);
@@ -90,50 +140,17 @@ public class Box : MonoBehaviour
                             }
                         }
                     }
-                    
-
-                    
                 }
+            }
 
-                (int,int) findLocation(GameObject o)
-                {
-                    
-                    Regex pattern = new Regex(@"box(\d+)_(\d+)");
-                    Match match = pattern.Match(o.name);
-                    int x = int.Parse(match.Groups[1].Value);  
-                    int y = int.Parse(match.Groups[2].Value);
-                    return (x, y);
-                }
+            return;
+        }
 
-                
-            }
-            
-            void ChangeSpriteFlag(GameObject o)
+        if (state == 1)
+        {
+            if (Input.GetMouseButtonUp(1))
             {
-                o.GetComponent<SpriteRenderer>().sprite = flag;
-                o.GetComponent<SpriteRenderer>().color = Color.white;
-                o.transform.localScale = new Vector3((1024f / scale) / flag.rect.size.x,
-                    (1024f / scale) / flag.rect.size.y, 1f);
-                o.GetComponent<Box>().state = 1;
-            }
-                
-            void ChangeSpriteMine(GameObject o)
-            {
-                o.GetComponent<SpriteRenderer>().sprite = flag;
-                o.GetComponent<SpriteRenderer>().color = Color.red;
-                o.transform.localScale = new Vector3((1024f / scale) / flag.rect.size.x,
-                    (1024f / scale) / flag.rect.size.y, 1f);
-                o.GetComponent<Box>().state = 2;
-            }
-                
-            void ChangeSprite(GameObject o)
-            {
-                Sprite image = number[o.GetComponent<Box>().neighbour];
-                o.GetComponent<SpriteRenderer>().sprite = image;
-                o.GetComponent<SpriteRenderer>().color = Color.white;
-                o.transform.localScale = new Vector3((1024f / scale) / image.rect.size.x,
-                    (1024f / scale) / image.rect.size.y, 1f);
-                o.GetComponent<Box>().state = 2;
+                ChangeSpriteReset(self);
             }
 
         }
