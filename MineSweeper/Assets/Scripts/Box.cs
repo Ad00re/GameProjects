@@ -11,17 +11,25 @@ public class Box : MonoBehaviour
     public bool mine;
     public int neighbour;
     public int scale;
+    public int mineCount;
     public Sprite[] number;
     public float delayTime = 1f;
     public float time = 0f;
     public bool die;
     //three states, 0 for init state, 1 for flag, 2 for opened
     public int state;
-    
+    public static int opened;
+    public static bool win;
 
+
+    void Start()
+    {
+        
+    }
     // Update is called once per frame
     void Update()
     {
+        
         if (die)
         {
             time += Time.deltaTime;
@@ -59,6 +67,7 @@ public class Box : MonoBehaviour
         o.transform.localScale = new Vector3((1024f / (scale+1)) / flag.rect.size.x,
             (1024f / (scale+1)) / flag.rect.size.y, 1f);
         o.GetComponent<Box>().state = 2;
+        
     }
                 
     void ChangeSprite(GameObject o)
@@ -69,6 +78,10 @@ public class Box : MonoBehaviour
         o.transform.localScale = new Vector3((1024f / (scale+1)) / image.rect.size.x,
             (1024f / (scale+1)) / image.rect.size.y, 1f);
         o.GetComponent<Box>().state = 2;
+        
+        opened += 1;
+        Debug.Log(o.name);
+        Debug.Log(opened);
     }
     
     void ChangeSpriteReset(GameObject o)
@@ -83,6 +96,7 @@ public class Box : MonoBehaviour
 
     public void ClickOn()
     {
+       
         GameObject self = GameObject.Find(name);
         if (state == 0)
         {
@@ -96,6 +110,7 @@ public class Box : MonoBehaviour
                 if (mine)
                 {
                     ChangeSpriteMine(self);
+                    EndGameController.win = false;
                     die = true;
                 }
                 else
@@ -131,18 +146,28 @@ public class Box : MonoBehaviour
                                     }
                                     curBox = GameObject.Find("box" + (x+i) + "_" + (y+j));
                                     int stateBeforeModify = curBox.GetComponent<Box>().state;
-                                    ChangeSprite(curBox);
-                                    if (curBox.GetComponent<Box>().neighbour==0 && stateBeforeModify==0)
+                                    if (stateBeforeModify == 0)
                                     {
-                                        queue.Add((x+i,y+j));
+                                        ChangeSprite(curBox);
+                                        if (curBox.GetComponent<Box>().neighbour==0)
+                                        {
+                                            queue.Add((x+i,y+j));
+                                        }
                                     }
+                                    
                                 }
                             }
                         }
                     }
                 }
             }
-
+            //check for win game
+            if (opened >= scale * scale - mineCount)
+            {
+                opened = 0;
+                EndGameController.win = true;
+                die = true;
+            }
             return;
         }
 

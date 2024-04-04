@@ -62,6 +62,7 @@ public class MineManager : MonoBehaviour
                 newBox.transform.localScale = new Vector3(windowSize /(gridSize+1), windowSize /(gridSize+1), 0);
                 newBox.name = "box" + i.ToString() + "_" + j.ToString();
                 newBox.GetComponent<Box>().mine = grid[i, j];
+                newBox.GetComponent<Box>().mineCount = mineCount;
                 newBox.GetComponent<Box>().scale = gridSize;
                 newBox.GetComponent<Box>().neighbour = checkNeighbor(new Vector2Int(i, j));
 
