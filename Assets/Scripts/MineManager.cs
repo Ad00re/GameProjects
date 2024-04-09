@@ -23,6 +23,11 @@ public class MineManager : MonoBehaviour
     public State[,] gridStates;
     public int opened = 0;
     public String difficulty;
+
+    private float time = 0;
+    private float delayTime = 1f;
+    public bool win = false;
+    public bool lose = false;
     
     //view
     [SerializeField] private GameObject[] boxs;
@@ -114,31 +119,19 @@ public class MineManager : MonoBehaviour
                 }
             }
         }
-        string rowString;
-
-        for (int i = 0; i < gameGrid.GetLength(0); i++) // Loop through rows
-        {
-            rowString = ""; // Start with an empty string for each row
-
-            for (int j = 0; j < gameGrid.GetLength(1); j++) // Loop through columns
-            {
-                // Add each element to the row string, followed by a comma unless it's the last element
-                rowString += gameGrid[i, j].ToString();
-                if (j < gameGrid.GetLength(1) - 1)
-                {
-                    rowString += ",";
-                }
-            }
-
-            // Use Debug.Log to print the entire row
-            Debug.Log(rowString);
-        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (win || lose)
+        {
+            time += Time.deltaTime;
+            if (time > delayTime)
+            {
+                SceneManager.LoadScene("Scenes/End");
+            }
+        }
     }
     
     int CheckNeighbor(Vector2Int loc)
@@ -174,10 +167,12 @@ public class MineManager : MonoBehaviour
             if (gameGrid[loc.x, loc.y] == -1)
             {
                 Debug.Log("end game lose");
+                lose = true;
             }
             if (opened == gridSize * gridSize - mineCount)
             {
                 Debug.Log("end game win");
+                win = true;
             }
         }
     }
