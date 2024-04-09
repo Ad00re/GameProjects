@@ -26,6 +26,7 @@ public class MineManager : MonoBehaviour
 
     private float time = 0;
     private float delayTime = 1f;
+    public bool endGame = false;
     public bool win = false;
     public bool lose = false;
     
@@ -124,11 +125,13 @@ public class MineManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (win || lose)
+        if (endGame)
         {
             time += Time.deltaTime;
             if (time > delayTime)
             {
+                endGame = false;
+                time = 0f;
                 SceneManager.LoadScene("Scenes/End");
             }
         }
@@ -167,11 +170,13 @@ public class MineManager : MonoBehaviour
             if (gameGrid[loc.x, loc.y] == -1)
             {
                 Debug.Log("end game lose");
+                endGame = true;
                 lose = true;
             }
             if (opened == gridSize * gridSize - mineCount)
             {
                 Debug.Log("end game win");
+                endGame = true;
                 win = true;
             }
         }

@@ -18,12 +18,13 @@ public class EndController : MonoBehaviour
         {
             result.text = "You Loose";
         }
+        Debug.Log("finsh load end page");
     }
 
     public void Replay()
     {
-        MineManager.Instance.win = false;
-        MineManager.Instance.lose = false;
+        Destroy(MineManager.Instance);
         SceneManager.LoadScene("Scenes/Start");
+        
     }
 }
