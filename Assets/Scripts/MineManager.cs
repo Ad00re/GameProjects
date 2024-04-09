@@ -1,7 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 
@@ -19,6 +22,7 @@ public class MineManager : MonoBehaviour
     public int[,] gameGrid;
     public State[,] gridStates;
     public int opened = 0;
+    public String difficulty;
     
     //view
     [SerializeField] private GameObject[] boxs;
@@ -46,8 +50,22 @@ public class MineManager : MonoBehaviour
 
     void Start()
     {
-        gridSize = 9;
-        mineCount = 10;
+        if (MainMenuController.Difficulty == "Easy")
+        {
+            gridSize = 9;
+            mineCount = 10;
+        }
+        else if (MainMenuController.Difficulty == "Medium")
+        {
+            gridSize = 16;
+            mineCount = 40;
+        }
+        else
+        {
+            gridSize = 25;
+            mineCount = 99;
+        }
+        
         gameGrid = new int[gridSize, gridSize];
         gridStates = new State[gridSize, gridSize];
         colors = new Color[boxs.Length];
@@ -152,6 +170,15 @@ public class MineManager : MonoBehaviour
         if (state == State.Opened)
         {
             opened += 1;
+            Debug.Log(loc+": "+opened);
+            if (gameGrid[loc.x, loc.y] == -1)
+            {
+                Debug.Log("end game lose");
+            }
+            if (opened == gridSize * gridSize - mineCount)
+            {
+                Debug.Log("end game win");
+            }
         }
     }
     
@@ -172,7 +199,6 @@ public class MineManager : MonoBehaviour
             o.GetComponent<SpriteRenderer>().color = Color.red;
             o.transform.localScale = new Vector3((1024f / (gridSize+1)) / flag.rect.size.x,
                 (1024f / (gridSize+1)) / flag.rect.size.y, 1f);
-
         }
         else
         {
