@@ -30,7 +30,7 @@ public class MineDisplay : MonoBehaviour
                 MineManager.Instance.ChangeSprite(loc,gameObject);
                 if (MineManager.Instance.gameGrid[loc.x, loc.y] == 0)
                 {
-                    //Expand(loc);
+                    Expand(loc);
                 }
             }
         }
@@ -45,43 +45,45 @@ public class MineDisplay : MonoBehaviour
         return new Vector2Int(x, y);
     }
 
-    // void Expand(Vector2Int loc)
-    // {
-    //     List<Vector2Int> queue = new List<Vector2Int>{loc};
-    //     while (queue.Count > 0)
-    //     {
-    //         loc= queue[0];
-    //         queue.RemoveAt(0);
-    //         for (int i = -1; i < 2; i++)
-    //         {
-    //             if (loc.x + i < 0 || loc.x + i >= MineManager.Instance.gridSize)
-    //             {
-    //                 continue;
-    //             }
-    //             for (int j = -1; j < 2; j++)
-    //             {
-    //                 if (loc.y + j >= 0 && loc.y + j < MineManager.Instance.gridSize)
-    //                 {
-    //                     if (i == 0 && j == 0)
-    //                     {
-    //                         continue;
-    //                     }
-    //                     GameObject curBox = GameObject.Find("box" + (loc.x+i) + "_" + (loc.y+j));
-    //                     if (MineManager.Instance.gridStates[loc.x,loc.y] == MineManager.State.Init)
-    //                     {
-    //                         MineManager.Instance.ChangeState(new Vector2Int(loc.x,loc.y),MineManager.State.Opened);
-    //                         MineManager.Instance.ChangeSprite(loc,curBox);
-    //                         if (MineManager.Instance.gameGrid[loc.x+i,loc.y+j]==0)
-    //                         {
-    //                             queue.Add(new Vector2Int(loc.x+i,loc.y+j));
-    //                         }
-    //                     }
-    //                                 
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+    void Expand(Vector2Int loc)
+    {
+        List<Vector2Int> queue = new List<Vector2Int>{loc};
+        while (queue.Count > 0)
+        {
+            loc= queue[0];
+            queue.RemoveAt(0);
+            for (int i = -1; i < 2; i++)
+            {
+                if (loc.x + i < 0 || loc.x + i >= MineManager.Instance.gridSize)
+                {
+                    continue;
+                }
+                for (int j = -1; j < 2; j++)
+                {
+                    if (loc.y + j >= 0 && loc.y + j < MineManager.Instance.gridSize)
+                    {
+                        if (i == 0 && j == 0)
+                        {
+                            continue;
+                        }
+
+                        Vector2Int curLoc = new Vector2Int(i, j) + loc;
+                        GameObject curBox = GameObject.Find("box" + (loc.x+i) + "_" + (loc.y+j));
+                        if (MineManager.Instance.gridStates[loc.x+i,loc.y+j] == MineManager.State.Init)
+                        {
+                            if (MineManager.Instance.gameGrid[loc.x+i,loc.y+j]==0 )
+                            {
+                                queue.Add(curLoc);
+                            }
+                            MineManager.Instance.ChangeState(curLoc,MineManager.State.Opened);
+                            MineManager.Instance.ChangeSprite(curLoc,curBox);
+                            
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     
 

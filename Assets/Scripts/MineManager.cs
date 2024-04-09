@@ -96,6 +96,25 @@ public class MineManager : MonoBehaviour
                 }
             }
         }
+        string rowString;
+
+        for (int i = 0; i < gameGrid.GetLength(0); i++) // Loop through rows
+        {
+            rowString = ""; // Start with an empty string for each row
+
+            for (int j = 0; j < gameGrid.GetLength(1); j++) // Loop through columns
+            {
+                // Add each element to the row string, followed by a comma unless it's the last element
+                rowString += gameGrid[i, j].ToString();
+                if (j < gameGrid.GetLength(1) - 1)
+                {
+                    rowString += ",";
+                }
+            }
+
+            // Use Debug.Log to print the entire row
+            Debug.Log(rowString);
+        }
     }
 
     // Update is called once per frame
