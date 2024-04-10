@@ -1,10 +1,6 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 
@@ -17,20 +13,20 @@ public class MineManager : MonoBehaviour
         Flagged,
         Opened
     }
-    
     public enum GameState 
     {
         Playing,
         Win,
         Lose
     }
+    
+    
     public int  gridSize;
     public int mineCount;
     public int[,] scoreGrid;
     public State[,] gridStates;
     public int opened = 0;
-    public String difficulty;
-
+    
     private float time = 0;
     private float delayTime = 1f;
     
@@ -41,11 +37,10 @@ public class MineManager : MonoBehaviour
     [SerializeField] private GameObject[] boxs;
     [SerializeField] private Sprite flag;
     [SerializeField] private Sprite[] number;
-    private Sprite defaultSprite;
+    public Sprite defaultSprite;
     public Color[] colors;
-
-       
-    public List<(Vector2Int, State)> changeList = new List<(Vector2Int, State)>();
+    
+    public List<(Vector2Int, State)> Changelist = new List<(Vector2Int, State)>();
     
     
     
@@ -66,12 +61,12 @@ public class MineManager : MonoBehaviour
 
     void Start()
     {
-        if (MainMenuController.Difficulty == "Easy")
+        if (MainMenuController.GameDifficulty == "Easy")
         {
             gridSize = 9;
             mineCount = 10;
         }
-        else if (MainMenuController.Difficulty == "Medium")
+        else if (MainMenuController.GameDifficulty == "Medium")
         {
             gridSize = 16;
             mineCount = 40;
@@ -142,6 +137,7 @@ public class MineManager : MonoBehaviour
             time += Time.deltaTime;
             if (time > delayTime)
             {
+                gameState = GameState.Playing;
                 SceneManager.LoadScene("Scenes/End");
             }
         }
@@ -193,15 +189,15 @@ public class MineManager : MonoBehaviour
     public void UpdatedGridValue()
     {
         
-        while (changeList.Count > 0)
+        while (Changelist.Count > 0)
         {
-            Vector2Int loc= changeList[0].Item1;
-            State s = changeList[0].Item2;
+            Vector2Int loc= Changelist[0].Item1;
+            State s = Changelist[0].Item2;
             GameObject box = GameObject.Find("box" + (loc.x) + "_" + (loc.y));
             Sprite image;
             Color color = Color.white;
             
-            changeList.RemoveAt(0);
+            Changelist.RemoveAt(0);
             if (s == State.Opened)
             {
                 if (scoreGrid[loc.x, loc.y] == -1)
@@ -227,6 +223,44 @@ public class MineManager : MonoBehaviour
             box.GetComponent<SpriteRenderer>().color = color;
             box.transform.localScale = new Vector3((1024f / (gridSize+1)) / image.rect.size.x,
                 (1024f / (gridSize+1)) / image.rect.size.y, 1f);
+        }
+    }
+    
+    public void Expand(Vector2Int loc)
+    {
+        List<Vector2Int> queue = new List<Vector2Int>{loc};
+        while (queue.Count > 0)
+        {
+            loc= queue[0];
+            queue.RemoveAt(0);
+            for (int i = -1; i < 2; i++)
+            {
+                if (loc.x + i < 0 || loc.x + i >= gridSize)
+                {
+                    continue;
+                }
+                for (int j = -1; j < 2; j++)
+                {
+                    if (loc.y + j >= 0 && loc.y + j < gridSize)
+                    {
+                        if (i == 0 && j == 0)
+                        {
+                            continue;
+                        }
+
+                        Vector2Int curLoc = new Vector2Int(i, j) + loc;
+                        if (gridStates[loc.x+i,loc.y+j] == State.Init)
+                        {
+                            if (scoreGrid[loc.x+i,loc.y+j]==0 )
+                            {
+                                queue.Add(curLoc);
+                            }
+                            ChangeState(curLoc,State.Opened);
+                            Changelist.Add((curLoc,State.Opened));
+                        }
+                    }
+                }
+            }
         }
     }
 }

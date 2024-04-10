@@ -1,21 +1,20 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class MainMenuController : MonoBehaviour
 {
-    public static String Difficulty;
+    public static String GameDifficulty;
+    
 
     private void Start()
     {
         Debug.Log("load start page");
     }
 
-    public void LoadGame(string input)
+    public void LoadGame(String input)
     {
-        Difficulty = input;
+        GameDifficulty = input;
         SceneManager.LoadScene("Scenes/Game");
     }
 }
