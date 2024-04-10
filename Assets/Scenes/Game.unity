@@ -152,6 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 216e56ce41ce0499e8d5b708a2cdb201, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  boxLocation: {x: 0, y: 0}
 --- !u!4 &417227901
 Transform:
   m_ObjectHideFlags: 0
@@ -376,6 +377,7 @@ MonoBehaviour:
   gridSize: 9
   mineCount: 10
   opened: 0
+  gameState: 0
   boxs:
   - {fileID: 5801786000377434256, guid: f6bddf02300604842a88ade955b25af6, type: 3}
   - {fileID: 4008222653186739129, guid: 234bc435349c9445bba793b3de9c59eb, type: 3}
@@ -390,6 +392,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: b4eb37006f05145f4a9f863a531da30b, type: 3}
   - {fileID: 21300000, guid: 0cf34077b0da84ac986e1ddb053cefa5, type: 3}
   - {fileID: 21300000, guid: 21e65a08eff3a49ac9661120a529df27, type: 3}
+  defaultSprite: {fileID: 0}
+  colors: []
 --- !u!4 &1672646616
 Transform:
   m_ObjectHideFlags: 0
