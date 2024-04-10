@@ -10,7 +10,7 @@ public class EndController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (MineManager.Instance.win)
+        if (MineManager.Instance.gameState == MineManager.GameState.Win)
         {
             result.text = "You Win!";
         }

@@ -14,12 +14,12 @@ public class MineDisplay : MonoBehaviour
             if (MineManager.Instance.gridStates[loc.x, loc.y] == MineManager.State.Init)
             {
                 MineManager.Instance.ChangeState(loc,MineManager.State.Flagged);
-                MineManager.Instance.ChangeSpriteFlag(loc,gameObject);
+                MineManager.Instance.changeList.Add((loc,MineManager.State.Flagged));
             }
             else if (MineManager.Instance.gridStates[loc.x, loc.y] == MineManager.State.Flagged)
             {
                 MineManager.Instance.ChangeState(loc,MineManager.State.Init);
-                MineManager.Instance.ChangeSpriteReset(loc,gameObject);
+                MineManager.Instance.changeList.Add((loc,MineManager.State.Init));
             }
         }
         else
@@ -27,13 +27,14 @@ public class MineDisplay : MonoBehaviour
             if (MineManager.Instance.gridStates[loc.x, loc.y] == MineManager.State.Init)
             {
                 MineManager.Instance.ChangeState(loc,MineManager.State.Opened);
-                MineManager.Instance.ChangeSprite(loc,gameObject);
-                if (MineManager.Instance.gameGrid[loc.x, loc.y] == 0)
+                MineManager.Instance.changeList.Add((loc,MineManager.State.Opened));
+                if (MineManager.Instance.scoreGrid[loc.x, loc.y] == 0)
                 {
                     Expand(loc);
                 }
             }
         }
+        MineManager.Instance.UpdatedGridValue();
     }
     
     Vector2Int FindLocation(GameObject o)
@@ -68,16 +69,14 @@ public class MineDisplay : MonoBehaviour
                         }
 
                         Vector2Int curLoc = new Vector2Int(i, j) + loc;
-                        GameObject curBox = GameObject.Find("box" + (loc.x+i) + "_" + (loc.y+j));
                         if (MineManager.Instance.gridStates[loc.x+i,loc.y+j] == MineManager.State.Init)
                         {
-                            if (MineManager.Instance.gameGrid[loc.x+i,loc.y+j]==0 )
+                            if (MineManager.Instance.scoreGrid[loc.x+i,loc.y+j]==0 )
                             {
                                 queue.Add(curLoc);
                             }
                             MineManager.Instance.ChangeState(curLoc,MineManager.State.Opened);
-                            MineManager.Instance.ChangeSprite(curLoc,curBox);
-                            
+                            MineManager.Instance.changeList.Add((curLoc,MineManager.State.Opened));
                         }
                     }
                 }

@@ -17,18 +17,25 @@ public class MineManager : MonoBehaviour
         Flagged,
         Opened
     }
+    
+    public enum GameState 
+    {
+        Playing,
+        Win,
+        Lose
+    }
     public int  gridSize;
     public int mineCount;
-    public int[,] gameGrid;
+    public int[,] scoreGrid;
     public State[,] gridStates;
     public int opened = 0;
     public String difficulty;
 
     private float time = 0;
     private float delayTime = 1f;
-    public bool endGame = false;
-    public bool win = false;
-    public bool lose = false;
+    
+    public GameState gameState = GameState.Playing;
+    
     
     //view
     [SerializeField] private GameObject[] boxs;
@@ -36,6 +43,9 @@ public class MineManager : MonoBehaviour
     [SerializeField] private Sprite[] number;
     private Sprite defaultSprite;
     public Color[] colors;
+
+       
+    public List<(Vector2Int, State)> changeList = new List<(Vector2Int, State)>();
     
     
     
@@ -72,7 +82,7 @@ public class MineManager : MonoBehaviour
             mineCount = 99;
         }
         
-        gameGrid = new int[gridSize, gridSize];
+        scoreGrid = new int[gridSize, gridSize];
         gridStates = new State[gridSize, gridSize];
         colors = new Color[boxs.Length];
 
@@ -82,6 +92,7 @@ public class MineManager : MonoBehaviour
         }
 
         defaultSprite = boxs[0].GetComponent<SpriteRenderer>().sprite;
+
         
         // define the mine grid
         for (int i = 0; i < mineCount; i++)
@@ -92,9 +103,9 @@ public class MineManager : MonoBehaviour
             {
                 x = Random.Range(0, gridSize - 1);
                 y = Random.Range(0, gridSize - 1);
-            } while (gameGrid[x, y] == -1);
+            } while (scoreGrid[x, y] == -1);
 
-            gameGrid[x, y] = -1;
+            scoreGrid[x, y] = -1;
         }
         
         // define the state and GameObject of grids
@@ -114,9 +125,9 @@ public class MineManager : MonoBehaviour
         {
             for (int j = 0; j < gridSize; j++)
             {
-                if (gameGrid[i, j] != -1)
+                if (scoreGrid[i, j] != -1)
                 {
-                    gameGrid[i, j] = CheckNeighbor(new Vector2Int(i, j));
+                    scoreGrid[i, j] = CheckNeighbor(new Vector2Int(i, j));
                 }
             }
         }
@@ -125,13 +136,11 @@ public class MineManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (endGame)
+        if (gameState != GameState.Playing)
         {
             time += Time.deltaTime;
             if (time > delayTime)
             {
-                endGame = false;
-                time = 0f;
                 SceneManager.LoadScene("Scenes/End");
             }
         }
@@ -150,7 +159,7 @@ public class MineManager : MonoBehaviour
             {
                 if (loc.y + j >= 0 && loc.y + j < gridSize)
                 {
-                    if (gameGrid[loc.x + i, loc.y + j] ==-1)
+                    if (scoreGrid[loc.x + i, loc.y + j] ==-1)
                     {
                         counter += 1;
                     }
@@ -167,55 +176,56 @@ public class MineManager : MonoBehaviour
         {
             opened += 1;
             Debug.Log(loc+": "+opened);
-            if (gameGrid[loc.x, loc.y] == -1)
+            if (scoreGrid[loc.x, loc.y] == -1)
             {
                 Debug.Log("end game lose");
-                endGame = true;
-                lose = true;
+                gameState = GameState.Lose;
             }
             if (opened == gridSize * gridSize - mineCount)
             {
                 Debug.Log("end game win");
-                endGame = true;
-                win = true;
+                gameState = GameState.Win;
             }
         }
     }
-    
-    public void ChangeSpriteFlag(Vector2Int loc, GameObject o)
+
+    public void UpdatedGridValue()
     {
-        o.GetComponent<SpriteRenderer>().sprite = flag;
-        o.GetComponent<SpriteRenderer>().color = Color.white;
-        o.transform.localScale = new Vector3((1024f / (gridSize+1)) / flag.rect.size.x,
-            (1024f / (gridSize+1)) / flag.rect.size.y, 1f);
-    }
-    
-                
-    public void ChangeSprite(Vector2Int loc, GameObject o)
-    {
-        if (gameGrid[loc.x, loc.y] == -1)
+        
+        while (changeList.Count > 0)
         {
-            o.GetComponent<SpriteRenderer>().sprite = flag;
-            o.GetComponent<SpriteRenderer>().color = Color.red;
-            o.transform.localScale = new Vector3((1024f / (gridSize+1)) / flag.rect.size.x,
-                (1024f / (gridSize+1)) / flag.rect.size.y, 1f);
-        }
-        else
-        {
-            Sprite image = number[gameGrid[loc.x,loc.y]];
+            Vector2Int loc= changeList[0].Item1;
+            State s = changeList[0].Item2;
+            GameObject o = GameObject.Find("box" + (loc.x) + "_" + (loc.y));
+            Sprite image;
+            Color color = Color.white;
+            
+            changeList.RemoveAt(0);
+            if (s == State.Opened)
+            {
+                if (scoreGrid[loc.x, loc.y] == -1)
+                {
+                    image = flag;
+                    color = Color.red;
+                }
+                else
+                {
+                    image = number[scoreGrid[loc.x,loc.y]];
+                }
+            }
+            else if (s == State.Flagged)
+            {
+                image = flag;
+            }
+            else
+            {
+                image = defaultSprite;
+                color = colors[(loc.x+loc.y)%2];
+            }
             o.GetComponent<SpriteRenderer>().sprite = image;
-            o.GetComponent<SpriteRenderer>().color = Color.white;
+            o.GetComponent<SpriteRenderer>().color = color;
             o.transform.localScale = new Vector3((1024f / (gridSize+1)) / image.rect.size.x,
                 (1024f / (gridSize+1)) / image.rect.size.y, 1f);
         }
     }
-    public void ChangeSpriteReset(Vector2Int loc, GameObject o)
-    {
-        Sprite image = defaultSprite;
-        o.GetComponent<SpriteRenderer>().sprite = image;
-        o.GetComponent<SpriteRenderer>().color = colors[(loc.x+loc.y)%2];
-        o.transform.localScale = new Vector3((1024f / (gridSize+1)) / image.rect.size.x,
-            (1024f / (gridSize+1)) / image.rect.size.y, 1f);
-    }
-    
 }
