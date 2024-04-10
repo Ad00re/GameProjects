@@ -5,10 +5,11 @@ using System.Text.RegularExpressions;
 using UnityEditorInternal.VersionControl;
 
 public class MineDisplay : MonoBehaviour
-{ 
+{
+    public Vector2Int boxLocation;
     public void ClickOnObject()
     {
-        Vector2Int loc  = FindLocation(gameObject);
+        Vector2Int loc = boxLocation;
         if (Input.GetMouseButtonUp(1))
         {
             if (MineManager.Instance.gridStates[loc.x, loc.y] == MineManager.State.Init)
@@ -35,15 +36,6 @@ public class MineDisplay : MonoBehaviour
             }
         }
         MineManager.Instance.UpdatedGridValue();
-    }
-    
-    Vector2Int FindLocation(GameObject o)
-    {
-        Regex pattern = new Regex(@"box(\d+)_(\d+)");
-        Match match = pattern.Match(o.name);
-        int x = int.Parse(match.Groups[1].Value);  
-        int y = int.Parse(match.Groups[2].Value);
-        return new Vector2Int(x, y);
     }
 
     void Expand(Vector2Int loc)

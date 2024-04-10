@@ -118,6 +118,7 @@ public class MineManager : MonoBehaviour
                 newBox.transform.position = new Vector3((i-gridSize/2f+0.5f) *10f /(gridSize+1), (j-gridSize/2f+0.5f) *10f /(gridSize+1), 0);
                 newBox.transform.localScale = new Vector3(10f /(gridSize+1), 10f /(gridSize+1), 0);
                 newBox.name = "box" + i + "_" + j;
+                newBox.GetComponent<MineDisplay>().boxLocation = new Vector2Int(i, j);
             }
         }
 
@@ -196,7 +197,7 @@ public class MineManager : MonoBehaviour
         {
             Vector2Int loc= changeList[0].Item1;
             State s = changeList[0].Item2;
-            GameObject o = GameObject.Find("box" + (loc.x) + "_" + (loc.y));
+            GameObject box = GameObject.Find("box" + (loc.x) + "_" + (loc.y));
             Sprite image;
             Color color = Color.white;
             
@@ -222,9 +223,9 @@ public class MineManager : MonoBehaviour
                 image = defaultSprite;
                 color = colors[(loc.x+loc.y)%2];
             }
-            o.GetComponent<SpriteRenderer>().sprite = image;
-            o.GetComponent<SpriteRenderer>().color = color;
-            o.transform.localScale = new Vector3((1024f / (gridSize+1)) / image.rect.size.x,
+            box.GetComponent<SpriteRenderer>().sprite = image;
+            box.GetComponent<SpriteRenderer>().color = color;
+            box.transform.localScale = new Vector3((1024f / (gridSize+1)) / image.rect.size.x,
                 (1024f / (gridSize+1)) / image.rect.size.y, 1f);
         }
     }
