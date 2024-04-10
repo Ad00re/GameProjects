@@ -169,6 +169,7 @@ public class MineManager : MonoBehaviour
     public void ChangeState(Vector2Int loc, State state)
     {
         gridStates[loc.x, loc.y] = state;
+        Changelist.Add((loc,state));
         if (state == State.Opened)
         {
             opened += 1;
@@ -186,7 +187,7 @@ public class MineManager : MonoBehaviour
         }
     }
 
-    public void UpdatedGridValue()
+    public void UpdateGridDisplay()
     {
         
         while (Changelist.Count > 0)

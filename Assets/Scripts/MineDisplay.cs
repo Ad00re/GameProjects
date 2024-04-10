@@ -11,12 +11,10 @@ public class MineDisplay : MonoBehaviour
             if (MineManager.Instance.gridStates[loc.x, loc.y] == MineManager.State.Init)
             {
                 MineManager.Instance.ChangeState(loc,MineManager.State.Flagged);
-                MineManager.Instance.Changelist.Add((loc,MineManager.State.Flagged));
             }
             else if (MineManager.Instance.gridStates[loc.x, loc.y] == MineManager.State.Flagged)
             {
                 MineManager.Instance.ChangeState(loc,MineManager.State.Init);
-                MineManager.Instance.Changelist.Add((loc,MineManager.State.Init));
             }
         }
         else
@@ -24,14 +22,13 @@ public class MineDisplay : MonoBehaviour
             if (MineManager.Instance.gridStates[loc.x, loc.y] == MineManager.State.Init)
             {
                 MineManager.Instance.ChangeState(loc,MineManager.State.Opened);
-                MineManager.Instance.Changelist.Add((loc,MineManager.State.Opened));
                 if (MineManager.Instance.scoreGrid[loc.x, loc.y] == 0)
                 {
                     MineManager.Instance.Expand(loc);
                 }
             }
         }
-        MineManager.Instance.UpdatedGridValue();
+        MineManager.Instance.UpdateGridDisplay();
     }
 
     
