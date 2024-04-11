@@ -41,8 +41,7 @@ public class MineManager : MonoBehaviour
     public Color[] colors;
     
     public List<(Vector2Int, State)> Changelist = new List<(Vector2Int, State)>();
-    
-    
+    public GameObject[,] gridBoxs;
     
     public static MineManager Instance { get; private set; }
 
@@ -61,17 +60,17 @@ public class MineManager : MonoBehaviour
 
     void Start()
     {
-        if (MainMenuController.GameDifficulty == "Easy")
+        if (MainMenuController.GameDifficulty == MainMenuController.Difficulty.Easy)
         {
             gridSize = 9;
             mineCount = 10;
         }
-        else if (MainMenuController.GameDifficulty == "Medium")
+        else if (MainMenuController.GameDifficulty == MainMenuController.Difficulty.Medium)
         {
             gridSize = 16;
             mineCount = 40;
         }
-        else
+        else if (MainMenuController.GameDifficulty == MainMenuController.Difficulty.Hard)
         {
             gridSize = 25;
             mineCount = 99;
@@ -80,6 +79,7 @@ public class MineManager : MonoBehaviour
         scoreGrid = new int[gridSize, gridSize];
         gridStates = new State[gridSize, gridSize];
         colors = new Color[boxs.Length];
+        gridBoxs = new GameObject[gridSize, gridSize];
 
         for (int i = 0; i < boxs.Length; i++)
         {
@@ -110,6 +110,7 @@ public class MineManager : MonoBehaviour
             {
                 gridStates[i, j] = State.Init;
                 GameObject newBox = Instantiate(boxs[(i+j)%2]);
+                gridBoxs[i, j] = newBox;
                 newBox.transform.position = new Vector3((i-gridSize/2f+0.5f) *10f /(gridSize+1), (j-gridSize/2f+0.5f) *10f /(gridSize+1), 0);
                 newBox.transform.localScale = new Vector3(10f /(gridSize+1), 10f /(gridSize+1), 0);
                 newBox.name = "box" + i + "_" + j;
@@ -123,7 +124,7 @@ public class MineManager : MonoBehaviour
             {
                 if (scoreGrid[i, j] != -1)
                 {
-                    scoreGrid[i, j] = CheckNeighbor(new Vector2Int(i, j));
+                    scoreGrid[i, j] = GetNeighbourMineCount(new Vector2Int(i, j));
                 }
             }
         }
@@ -137,13 +138,13 @@ public class MineManager : MonoBehaviour
             time += Time.deltaTime;
             if (time > delayTime)
             {
-                gameState = GameState.Playing;
+                time = float.NegativeInfinity;
                 SceneManager.LoadScene("Scenes/End");
             }
         }
     }
     
-    int CheckNeighbor(Vector2Int loc)
+    int GetNeighbourMineCount(Vector2Int loc)
     {
         int counter = 0;
         for (int i = -1; i < 2; i++)
@@ -189,16 +190,13 @@ public class MineManager : MonoBehaviour
 
     public void UpdateGridDisplay()
     {
-        
-        while (Changelist.Count > 0)
+        for(int i = 0;i<Changelist.Count;i++)
         {
-            Vector2Int loc= Changelist[0].Item1;
-            State s = Changelist[0].Item2;
-            GameObject box = GameObject.Find("box" + (loc.x) + "_" + (loc.y));
+            Vector2Int loc= Changelist[i].Item1;
+            State s = Changelist[i].Item2;
+            GameObject box = gridBoxs[loc.x, loc.y];
             Sprite image;
             Color color = Color.white;
-            
-            Changelist.RemoveAt(0);
             if (s == State.Opened)
             {
                 if (scoreGrid[loc.x, loc.y] == -1)
@@ -257,7 +255,6 @@ public class MineManager : MonoBehaviour
                                 queue.Add(curLoc);
                             }
                             ChangeState(curLoc,State.Opened);
-                            Changelist.Add((curLoc,State.Opened));
                         }
                     }
                 }

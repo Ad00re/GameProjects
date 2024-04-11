@@ -12,11 +12,10 @@ public class EndController : MonoBehaviour
         {
             result.text = "You Win!";
         }
-        else
+        else if (MineManager.Instance.gameState == MineManager.GameState.Lose)
         {
             result.text = "You Loose";
         }
-        Debug.Log("finsh load end page");
     }
 
     public void Replay()

@@ -481,7 +481,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1762696291}
+      - m_Target: {fileID: 1762696293}
         m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
         m_MethodName: LoadGame
         m_Mode: 5
@@ -682,7 +682,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1762696291}
+      - m_Target: {fileID: 1762696293}
         m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
         m_MethodName: LoadGame
         m_Mode: 5
@@ -820,7 +820,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1762696292}
-  - component: {fileID: 1762696291}
+  - component: {fileID: 1762696293}
   m_Layer: 0
   m_Name: MainMenuController
   m_TagString: Untagged
@@ -828,18 +828,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1762696291
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1762696290}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8974e51d996a4428bad81512b9d24da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &1762696292
 Transform:
   m_ObjectHideFlags: 0
@@ -855,6 +843,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1762696293
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1762696290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8974e51d996a4428bad81512b9d24da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1854030591
 GameObject:
   m_ObjectHideFlags: 0
@@ -938,7 +938,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1762696291}
+      - m_Target: {fileID: 1762696293}
         m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
         m_MethodName: LoadGame
         m_Mode: 5
