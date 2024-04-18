@@ -24,7 +24,6 @@ public class CardDisplay : MonoBehaviour
         }
 
         CardManager.Instance.MarkDirty();
-
     }
     
     

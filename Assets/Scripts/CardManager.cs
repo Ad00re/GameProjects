@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -95,6 +96,19 @@ public class CardManager : MonoBehaviour
         }
     }
 
+    public void DiscardCard()
+    {
+        for(int i = Drawed.Count-1; i>-1;i--)
+        {
+            if (Selected.Contains(i))
+            {
+                Drawed.RemoveAt(i);
+            }
+        }
+        Selected = new List<int>();
+        MarkDirty();
+    }
+
     private List<GameObject> CardsView = new ();
     void UpdateDrawDisplay()
     {
@@ -107,9 +121,15 @@ public class CardManager : MonoBehaviour
                 card.transform.position = new Vector3(-1+i,-1,0);
             }
         }
+        
         for (int i = 0; i < CardsView.Count; i++)
         {
             GameObject card = CardsView[i];
+            if (i >= Drawed.Count)
+            {
+                card.SetActive(false);
+                continue;
+            }
             card.transform.position= new Vector3(-1+i,Selected.Contains(i)?0:-2,0);
             var cardDisplay = card.GetComponent<CardDisplay>();
             cardDisplay.rankText.text = Cards[Drawed[i]].Rank.ToString();
