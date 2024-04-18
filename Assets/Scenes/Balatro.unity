@@ -170,6 +170,7 @@ MonoBehaviour:
   Deck: 
   Drawed: 
   Selected: 
+  modified: 0
   cardPrefab: {fileID: 8846356697462430403, guid: 9c1ca26b22234468cae2da357280571d, type: 3}
 --- !u!1 &419029668
 GameObject:
@@ -662,11 +663,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4091337559625294692, guid: 9c1ca26b22234468cae2da357280571d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 4091337559625294692, guid: 9c1ca26b22234468cae2da357280571d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -2
       objectReference: {fileID: 0}
     - target: {fileID: 4091337559625294692, guid: 9c1ca26b22234468cae2da357280571d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -703,6 +704,10 @@ PrefabInstance:
     - target: {fileID: 8846356697462430403, guid: 9c1ca26b22234468cae2da357280571d, type: 3}
       propertyPath: m_Name
       value: Card
+      objectReference: {fileID: 0}
+    - target: {fileID: 8846356697462430403, guid: 9c1ca26b22234468cae2da357280571d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -794,7 +799,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 234436989}
         m_TargetAssemblyTypeName: CardManager, Assembly-CSharp
-        m_MethodName: DrawCard
+        m_MethodName: DiscardCard
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
