@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityAsync;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -51,7 +52,7 @@ public class CardManager : MonoBehaviour
         }
     }
 
-    void Start()
+    async void Start()
     {
         Cards = new List<Card>();
         Deck = new List<int>();
@@ -69,7 +70,9 @@ public class CardManager : MonoBehaviour
             Deck.Add(i);
         }
         
-
+        Debug.Log("this is the first msg");
+        await UnityAsync.Await.Seconds(1);
+        Debug.Log("this is the second msg");
     }
 
     // Update is called once per frame
@@ -96,17 +99,18 @@ public class CardManager : MonoBehaviour
         }
     }
 
-    public void DiscardCard()
+    public async void DiscardCard()
     {
         for(int i = Drawed.Count-1; i>-1;i--)
         {
             if (Selected.Contains(i))
             {
                 Drawed.RemoveAt(i);
+                Selected.Remove(i);
+                MarkDirty();
+                await UnityAsync.Await.Seconds(0.3f);
             }
         }
-        Selected = new List<int>();
-        MarkDirty();
     }
 
     private List<GameObject> CardsView = new ();
