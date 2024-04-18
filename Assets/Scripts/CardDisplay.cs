@@ -1,24 +1,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class CardDisplay : MonoBehaviour
 {
     // Start is called before the first frame update
-    [SerializeField] public Text rankText;
-    [SerializeField] public Text suitText;
-    void Start()
-    {
-        
-        
-    }
+    public int CardIndexInHand;
+    public Text rankText;
+    public Text suitText;
 
-    // Update is called once per frame
-    void Update()
+    public void OnMouseDown()
     {
-        
+        var Selected = CardManager.Instance.Selected;
+        if (Selected.Contains(CardIndexInHand))
+        {
+            Selected.Remove(CardIndexInHand);
+        }
+        else
+        {
+            Selected.Add(CardIndexInHand);
+        }
+
+        CardManager.Instance.MarkDirty();
+
     }
+    
     
     
 }
