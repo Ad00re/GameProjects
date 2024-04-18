@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,14 +30,26 @@ public class CardManager : MonoBehaviour
 {
     public List<Card> Cards;
     public List<int> Deck;
-    public List<int> prevDrawed;
     public List<int> Drawed;
     public List<int> Selected;
-    private bool modified = false;
+    public bool modified = false;
 
     [SerializeField] private GameObject cardPrefab;
-    
-    // Start is called before the first frame update
+
+    public static CardManager Instance { get; private set; }
+
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else if (Instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
+
     void Start()
     {
         Cards = new List<Card>();
@@ -73,34 +86,45 @@ public class CardManager : MonoBehaviour
         Debug.Log(Deck.Count);
         Debug.Log(Drawed.Count);
         int numberOfDraw = 7 - Drawed.Count;
-        for (int i = 0; i < numberOfDraw; i++)
+        for (int i = 0; i < 2; i++)
         {
             int indexOfCard = Random.Range(0, Deck.Count);
             Drawed.Add(Deck[indexOfCard]);
             Deck.RemoveAt(indexOfCard);
-            modified = true;
+            MarkDirty();
         }
-        
     }
 
+    private List<GameObject> CardsView = new ();
     void UpdateDrawDisplay()
     {
-        int counter = -1;
-        foreach (int ind in Drawed)
+        for(int i = 0;i<Drawed.Count;i++)
         {
-            if (!prevDrawed.Contains(ind))
+            if (i >= CardsView.Count)
             {
                 GameObject card = Instantiate(cardPrefab);
-                card.transform.Translate(counter,0,0);
-                card.GetComponent<CardDisplay>().rankText.text = Cards[ind].Rank.ToString();
-                card.GetComponent<CardDisplay>().suitText.text = Cards[ind].Suit.ToString();
-                card.SetActive(true);
-                counter += 1;
+                CardsView.Add(card);
+                card.transform.position = new Vector3(-1+i,-1,0);
             }
+        }
+        for (int i = 0; i < CardsView.Count; i++)
+        {
+            GameObject card = CardsView[i];
+            card.transform.position= new Vector3(-1+i,Selected.Contains(i)?0:-2,0);
+            var cardDisplay = card.GetComponent<CardDisplay>();
+            cardDisplay.rankText.text = Cards[Drawed[i]].Rank.ToString();
+            cardDisplay.suitText.text = Cards[Drawed[i]].Suit.ToString();
+            card.SetActive(true);
+            cardDisplay.CardIndexInHand = i;
         }
 
         modified = false;
 
+    }
+
+    public void MarkDirty()
+    {
+        modified = true;
     }
 }
 
