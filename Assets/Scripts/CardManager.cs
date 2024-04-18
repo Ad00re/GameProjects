@@ -33,7 +33,9 @@ public class CardManager : MonoBehaviour
     public List<Card> Cards;
     public List<int> Deck;
     public List<int> Drawed;
+    public List<int> Play;
     public List<int> Selected;
+    
     public bool modified = false;
 
     [SerializeField] private GameObject cardPrefab;
@@ -57,6 +59,7 @@ public class CardManager : MonoBehaviour
         Cards = new List<Card>();
         Deck = new List<int>();
         Drawed = new List<int>();
+        Play = new List<int>();
         foreach (Suit suit in System.Enum.GetValues(typeof(Suit)))
         {
             foreach (Rank rank in System.Enum.GetValues(typeof(Rank)))
@@ -76,11 +79,15 @@ public class CardManager : MonoBehaviour
     }
 
     // Update is called once per frame
+    public List<GameObject> CardsViewPlay = new ();
+    public List<GameObject> CardsViewHand = new ();
     void Update()
     {
         if (modified)
         {
-            UpdateDrawDisplay();
+            DisplayCardView(Drawed, new Vector3(-1, -2, 0), Selected,CardsViewHand);
+            modified = false;
+            DisplayCardView(Play,new Vector3(-1, 3, 0),new List<int>(),CardsViewPlay);
         }
         
     }
@@ -113,38 +120,51 @@ public class CardManager : MonoBehaviour
         }
     }
 
-    private List<GameObject> CardsView = new ();
-    void UpdateDrawDisplay()
+    public async void PlayCard()
     {
-        for(int i = 0;i<Drawed.Count;i++)
+        for(int i = Drawed.Count-1; i>-1;i--)
+        {
+            if (Selected.Contains(i))
+            {
+                Play.Add(Drawed[i]);
+                Drawed.RemoveAt(i);
+                Selected.Remove(i);                
+                MarkDirty();
+                await UnityAsync.Await.Seconds(1f);
+            }
+        }
+        
+    }
+
+    
+
+    void DisplayCardView(List<int> CardIndex, Vector3 bottomLeft, List<int> SelectedIndex,List<GameObject> CardsView)
+    {
+        for(int i = 0;i<CardIndex.Count;i++)
         {
             if (i >= CardsView.Count)
             {
                 GameObject card = Instantiate(cardPrefab);
                 CardsView.Add(card);
-                card.transform.position = new Vector3(-1+i,-1,0);
             }
         }
-        
         for (int i = 0; i < CardsView.Count; i++)
         {
             GameObject card = CardsView[i];
-            if (i >= Drawed.Count)
+            if (i >= CardIndex.Count)
             {
                 card.SetActive(false);
                 continue;
             }
-            card.transform.position= new Vector3(-1+i,Selected.Contains(i)?0:-2,0);
+            card.transform.position= new Vector3(i,SelectedIndex.Contains(i)?2:0,0) + bottomLeft;
             var cardDisplay = card.GetComponent<CardDisplay>();
-            cardDisplay.rankText.text = Cards[Drawed[i]].Rank.ToString();
-            cardDisplay.suitText.text = Cards[Drawed[i]].Suit.ToString();
+            cardDisplay.rankText.text = Cards[CardIndex[i]].Rank.ToString();
+            cardDisplay.suitText.text = Cards[CardIndex[i]].Suit.ToString();
             card.SetActive(true);
             cardDisplay.CardIndexInHand = i;
         }
-
-        modified = false;
-
     }
+    
 
     public void MarkDirty()
     {

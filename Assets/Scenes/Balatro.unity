@@ -169,6 +169,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Deck: 
   Drawed: 
+  Play: 
   Selected: 
   modified: 0
   cardPrefab: {fileID: 8846356697462430403, guid: 9c1ca26b22234468cae2da357280571d, type: 3}
@@ -257,7 +258,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 234436989}
         m_TargetAssemblyTypeName: CardManager, Assembly-CSharp
-        m_MethodName: DrawCard
+        m_MethodName: PlayCard
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
