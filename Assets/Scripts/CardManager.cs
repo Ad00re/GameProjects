@@ -16,6 +16,10 @@ public enum Rank
     Ace = 1, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King
 }
 
+public enum Hand{
+    StraightFlush,FourOfAKind,FullHouse,Flush,Straight,ThreeOfAKind,TwoPair,Pair,HighCard
+}
+
 public class Card
 {
     public Suit Suit { get; private set; }
@@ -134,10 +138,8 @@ public class CardManager : MonoBehaviour
             }
         }
         
+        
     }
-
-    
-
     void DisplayCardView(List<int> CardIndex, Vector3 bottomLeft, List<int> SelectedIndex,List<GameObject> CardsView)
     {
         for(int i = 0;i<CardIndex.Count;i++)
@@ -170,6 +172,86 @@ public class CardManager : MonoBehaviour
     {
         modified = true;
     }
+
+    public Hand CalculateSelectedScore()
+    {
+        List<int> cardIndices = Selected.Select(i => Drawed[i]).ToList();
+        List<Card> selectedCards = cardIndices.Select(i => Cards[i]).ToList();
+        List<Card> sortedCards = selectedCards.OrderBy(card => card.Rank).ToList();
+        Dictionary<Rank, int> valueCount = sortedCards.GroupBy(card => card.Rank).ToDictionary(group => group.Key, group => group.Count());
+        if (sortedCards.Count == 5)
+        {
+            bool straight = isStraight(sortedCards);
+            bool flush = isFlush(sortedCards);
+            if (flush && straight)
+            {
+                return Hand.StraightFlush;
+            }
+
+            if (flush)
+            {
+                return Hand.Flush;
+            }
+
+            if (straight)
+            {
+                return Hand.Straight;
+            }
+        }
+
+        if (valueCount.ContainsValue(4))
+        {
+            return Hand.FourOfAKind;
+        }
+
+        if (valueCount.ContainsValue(3))
+        {
+            if (valueCount.ContainsValue(2))
+            {
+                return Hand.FullHouse;
+            }
+
+            return Hand.ThreeOfAKind;
+        }
+
+        if (valueCount.Count(v => v.Value == 2) == 2)
+        {
+            return Hand.TwoPair;
+        }
+
+        if (valueCount.ContainsValue(2))
+        {
+            return Hand.Pair;
+        }
+        return Hand.HighCard;
+    }
+    
+    bool isStraight(List<Card> sortedCards)
+    {
+        if (sortedCards[0].Rank == Rank.Ace && sortedCards[1].Rank == Rank.Ten)
+        {
+            for (int i = 1; i < sortedCards.Count - 1; i++)
+            {
+                if (sortedCards[i + 1].Rank != sortedCards[i].Rank + 1)
+                    return false;
+            }
+
+            return true;
+        }
+        for (int i = 0; i < sortedCards.Count - 1; i++)
+        {
+            if (sortedCards[i + 1].Rank != sortedCards[i].Rank + 1)
+                return false;
+        }
+
+        return true;
+    }
+    bool isFlush(List<Card> sortedCards)
+    {
+        return sortedCards.All(card => card.Suit == sortedCards[0].Suit);
+    }
+
+    
 }
 
 

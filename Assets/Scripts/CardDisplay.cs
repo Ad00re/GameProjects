@@ -10,6 +10,7 @@ public class CardDisplay : MonoBehaviour
     public int CardIndexInHand;
     public Text rankText;
     public Text suitText;
+    public Text scoreText;
 
     public void OnMouseDown()
     {
@@ -22,7 +23,7 @@ public class CardDisplay : MonoBehaviour
         {
             Selected.Add(CardIndexInHand);
         }
-
+        
         CardManager.Instance.MarkDirty();
     }
     
