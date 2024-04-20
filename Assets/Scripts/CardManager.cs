@@ -2,8 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
+using Unity.VisualScripting;
 using UnityAsync;
 using UnityEngine;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 public enum Suit
@@ -17,9 +20,8 @@ public enum Rank
 }
 
 public enum Hand{
-    StraightFlush,FourOfAKind,FullHouse,Flush,Straight,ThreeOfAKind,TwoPair,Pair,HighCard
+    StraightFlush,FourOfAKind,FullHouse,Flush,Straight,ThreeOfAKind,TwoPair,Pair,HighCard,Nothing
 }
-
 public class Card
 {
     public Suit Suit { get; private set; }
@@ -39,10 +41,17 @@ public class CardManager : MonoBehaviour
     public List<int> Drawed;
     public List<int> Play;
     public List<int> Selected;
+    public List<int> Count;
     
     public bool modified = false;
 
     [SerializeField] private GameObject cardPrefab;
+    public int score;
+    public int multi;
+    public Hand hand;
+    public TextMeshProUGUI scoreText;
+    public TextMeshProUGUI multiText;
+    public TextMeshProUGUI handText;
 
     public static CardManager Instance { get; private set; }
 
@@ -76,10 +85,13 @@ public class CardManager : MonoBehaviour
         {
             Deck.Add(i);
         }
+
+        score = 0;
+        multi = 0;
+        hand = Hand.Nothing;
         
-        Debug.Log("this is the first msg");
-        await UnityAsync.Await.Seconds(1);
-        Debug.Log("this is the second msg");
+
+
     }
 
     // Update is called once per frame
@@ -89,9 +101,13 @@ public class CardManager : MonoBehaviour
     {
         if (modified)
         {
-            DisplayCardView(Drawed, new Vector3(-1, -2, 0), Selected,CardsViewHand);
+            DisplayCardView(Drawed, new Vector3(-2, -2, 0), Selected,CardsViewHand);
             modified = false;
-            DisplayCardView(Play,new Vector3(-1, 3, 0),new List<int>(),CardsViewPlay);
+            DisplayCardView(Play,new Vector3(-2, 3, 0),new List<int>(),CardsViewPlay);
+            
+            scoreText.text = score.ToString();
+            multiText.text = multi.ToString();
+            handText.text = (hand == Hand.Nothing)?"":hand.ToString();
         }
         
     }
@@ -100,14 +116,15 @@ public class CardManager : MonoBehaviour
     {
         Debug.Log(Deck.Count);
         Debug.Log(Drawed.Count);
-        int numberOfDraw = 7 - Drawed.Count;
-        for (int i = 0; i < 2; i++)
+        int numberOfDraw = 8 - Drawed.Count;
+        for (int i = 0; i < numberOfDraw ; i++)
         {
             int indexOfCard = Random.Range(0, Deck.Count);
             Drawed.Add(Deck[indexOfCard]);
             Deck.RemoveAt(indexOfCard);
-            MarkDirty();
         }
+        Drawed.Sort();
+        MarkDirty();
     }
 
     public async void DiscardCard()
@@ -130,15 +147,41 @@ public class CardManager : MonoBehaviour
         {
             if (Selected.Contains(i))
             {
-                Play.Add(Drawed[i]);
+                Play.Insert(0,Drawed[i]);
                 Drawed.RemoveAt(i);
                 Selected.Remove(i);                
                 MarkDirty();
-                await UnityAsync.Await.Seconds(1f);
+                await UnityAsync.Await.Seconds(0.3f);
             }
+        }
+        for (int i = 0; i < Play.Count; i++)
+        {
+            
+            (int, int) cardScore = CalculationCardScore(Cards[Play[i]]);
+            score += cardScore.Item1;
+            multi += cardScore.Item2;
+            MarkDirty();
+            await UnityAsync.Await.Seconds(0.3f);
         }
         
         
+    }
+
+    public (int, int) CalculationCardScore(Card card)
+    {
+        switch (card.Rank)
+        {
+            case Rank.Ace:
+                return (11, 0);
+            case Rank.Jack:
+                
+            case Rank.Queen:
+                
+            case Rank.King:
+                return (10, 0);
+            default:
+                return ((int)card.Rank, 0);
+        }
     }
     void DisplayCardView(List<int> CardIndex, Vector3 bottomLeft, List<int> SelectedIndex,List<GameObject> CardsView)
     {
@@ -165,6 +208,7 @@ public class CardManager : MonoBehaviour
             card.SetActive(true);
             cardDisplay.CardIndexInHand = i;
         }
+        
     }
     
 
@@ -173,12 +217,38 @@ public class CardManager : MonoBehaviour
         modified = true;
     }
 
-    public Hand CalculateSelectedScore()
+    public (int, int) CalculateSelectedScore(Hand currentHand)
     {
-        List<int> cardIndices = Selected.Select(i => Drawed[i]).ToList();
-        List<Card> selectedCards = cardIndices.Select(i => Cards[i]).ToList();
+        switch (currentHand)
+        {
+            case Hand.StraightFlush:
+                return (100, 8);
+            case Hand.FourOfAKind:
+                return (60, 7);
+            case Hand.FullHouse:
+                return (40, 4);
+            case Hand.Flush:
+                return (35, 4);
+            case Hand.Straight:
+                return (30, 4);
+            case Hand.ThreeOfAKind:
+                return (30, 3);
+            case Hand.TwoPair:
+                return (20, 2);
+            case Hand.Pair:
+                return (10, 2);
+            case Hand.HighCard:
+                return (5, 1);
+        }
+
+        return (0, 0);
+    }
+
+    public Hand CalculateSelectedHand(List<Card> selectedCards)
+    {
         List<Card> sortedCards = selectedCards.OrderBy(card => card.Rank).ToList();
-        Dictionary<Rank, int> valueCount = sortedCards.GroupBy(card => card.Rank).ToDictionary(group => group.Key, group => group.Count());
+        Dictionary<Rank, int> valueCount =
+            selectedCards.GroupBy(card => card.Rank).ToDictionary(grp => grp.Key, grp => grp.Count());
         if (sortedCards.Count == 5)
         {
             bool straight = isStraight(sortedCards);
@@ -223,7 +293,11 @@ public class CardManager : MonoBehaviour
         {
             return Hand.Pair;
         }
-        return Hand.HighCard;
+        if (valueCount.ContainsValue(1))
+        {
+            return Hand.HighCard;
+        }
+        return Hand.Nothing;
     }
     
     bool isStraight(List<Card> sortedCards)
@@ -243,7 +317,6 @@ public class CardManager : MonoBehaviour
             if (sortedCards[i + 1].Rank != sortedCards[i].Rank + 1)
                 return false;
         }
-
         return true;
     }
     bool isFlush(List<Card> sortedCards)
