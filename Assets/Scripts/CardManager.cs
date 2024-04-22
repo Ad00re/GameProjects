@@ -41,7 +41,7 @@ public class CardManager : MonoBehaviour
     public List<int> Drawed;
     public List<int> Play;
     public List<int> Selected;
-    public List<int> Count;
+    public List<int> IndexOfCardCountInPlay;
     public int scoringCardIndexInPlay=-1;
     
     public bool modified = false;
@@ -50,9 +50,11 @@ public class CardManager : MonoBehaviour
     public int score;
     public int multi;
     public Hand hand;
+    public int roundScore;
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI multiText;
     public TextMeshProUGUI handText;
+    public TextMeshProUGUI roundScoreText;
 
     public static CardManager Instance { get; private set; }
 
@@ -89,6 +91,7 @@ public class CardManager : MonoBehaviour
 
         score = 0;
         multi = 0;
+        roundScore = 0;
         hand = Hand.Nothing;
         
 
@@ -112,6 +115,7 @@ public class CardManager : MonoBehaviour
             scoreText.text = score.ToString();
             multiText.text = multi.ToString();
             handText.text = (hand == Hand.Nothing)?"":hand.ToString();
+           roundScoreText.text = roundScore.ToString();
         }
         
     }
@@ -155,24 +159,24 @@ public class CardManager : MonoBehaviour
                 Drawed.RemoveAt(i);
                 Selected.Remove(i);                
                 MarkDirty();
-                await UnityAsync.Await.Seconds(0.3f);
             }
         }
         for (int i = 0; i < Play.Count; i++)
         {
-            if (Count.Contains(i))
+            List<Card> playCards = Play.Select(j => Cards[j]).ToList();
+            IndexOfCardCountInPlay = CalculateSelectedHand(playCards).Item2;
+            if (IndexOfCardCountInPlay.Contains(i))
             {
                 scoringCardIndexInPlay = i;
                 (int, int) cardScore = CalculationCardScore(Cards[Play[i]]);
                 score += cardScore.Item1;
                 multi += cardScore.Item2;
-                MarkDirty();
-                await UnityAsync.Await.Seconds(0.3f);
             }
-            
+            MarkDirty();
+            await UnityAsync.Await.Seconds(0.5f);
         }
-        
-        
+        roundScore += score * multi;
+        MarkDirty();
     }
 
     public (int, int) CalculationCardScore(Card card)
@@ -252,11 +256,13 @@ public class CardManager : MonoBehaviour
         return (0, 0);
     }
 
-    public Hand CalculateSelectedHand(List<Card> selectedCards)
+    public (Hand,List<int>) CalculateSelectedHand(List<Card> selectedCards)
     {
         List<Card> sortedCards = selectedCards.OrderBy(card => card.Rank).ToList();
         Dictionary<Rank, int> valueCount =
             selectedCards.GroupBy(card => card.Rank).ToDictionary(grp => grp.Key, grp => grp.Count());
+        List<int> Count = null;
+        Hand hand = Hand.Nothing;
         if (sortedCards.Count == 5)
         {
             bool straight = isStraight(sortedCards);
@@ -264,42 +270,51 @@ public class CardManager : MonoBehaviour
             if (flush && straight)
             {
                 Count = new List<int> { 0, 1, 2, 3, 4 };
-                return Hand.StraightFlush;
+                hand =  Hand.StraightFlush;
             }
 
-            if (flush)
+            else if (flush)
             {
                 Count = new List<int> { 0, 1, 2, 3, 4 };
-                return Hand.Flush;
+                hand= Hand.Flush;
             }
 
-            if (straight)
+            else if (straight)
             {
                 Count = new List<int> { 0, 1, 2, 3, 4 };
-                return Hand.Straight;
+                hand= Hand.Straight;
+            }
+
+            if (hand != Hand.Nothing)
+            {
+                return (hand, Count);
             }
         }
 
         if (valueCount.ContainsValue(4))
         {
             List<Rank> rankList = new List<Rank> { valueCount.FirstOrDefault(x => x.Value == 4).Key };
-            UpdateCountByRank(selectedCards,rankList);
-            return Hand.FourOfAKind;
+            Count = UpdateCountByRank(selectedCards,rankList);
+            hand= Hand.FourOfAKind;
         }
 
-        if (valueCount.ContainsValue(3))
+        else if (valueCount.ContainsValue(3))
         {
             if (valueCount.ContainsValue(2))
             {
                 Count = new List<int> { 0, 1, 2, 3, 4 };
-                return Hand.FullHouse;
+                hand= Hand.FullHouse;
             }
-            List<Rank> rankList = new List<Rank> { valueCount.FirstOrDefault(x => x.Value == 3).Key };
-            UpdateCountByRank(selectedCards,rankList);
-            return Hand.ThreeOfAKind;
+            else
+            {
+                List<Rank> rankList = new List<Rank> { valueCount.FirstOrDefault(x => x.Value == 3).Key };
+                Count = UpdateCountByRank(selectedCards,rankList);
+                hand= Hand.ThreeOfAKind;
+            }
+           
         }
 
-        if (valueCount.Count(v => v.Value == 2) == 2)
+        else if (valueCount.Count(v => v.Value == 2) == 2)
         {
             List<Rank> rankList = new List<Rank>();
             foreach (KeyValuePair<Rank, int> pair in valueCount)
@@ -309,35 +324,35 @@ public class CardManager : MonoBehaviour
                     rankList.Add(pair.Key);
                 }
             }
-            UpdateCountByRank(selectedCards,rankList);
-            return Hand.TwoPair;
+            Count = UpdateCountByRank(selectedCards,rankList);
+            hand= Hand.TwoPair;
         }
 
-        if (valueCount.ContainsValue(2))
+        else if (valueCount.ContainsValue(2))
         {
             List<Rank> rankList = new List<Rank> { valueCount.FirstOrDefault(x => x.Value == 2).Key };
-            UpdateCountByRank(selectedCards,rankList);
-            return Hand.Pair;
+            Count = UpdateCountByRank(selectedCards,rankList);
+            hand= Hand.Pair;
         }
-        if (valueCount.ContainsValue(1))
+        else if (valueCount.ContainsValue(1))
         {
             if (valueCount.ContainsKey(Rank.Ace))
             {
-                UpdateCountByRank(selectedCards,new List<Rank>{Rank.Ace});
+                Count = UpdateCountByRank(selectedCards,new List<Rank>{Rank.Ace});
             }
             else
             {
-                UpdateCountByRank(selectedCards,new List<Rank>{valueCount.Aggregate((l, r) => l.Value > r.Value ? l : r).Key});
+                Count = UpdateCountByRank(selectedCards,new List<Rank>{valueCount.Aggregate((l, r) => l.Value > r.Value ? l : r).Key});
             }
-            return Hand.HighCard;
-
+            hand= Hand.HighCard;
         }
-        return Hand.Nothing;
+
+        return (hand, Count);
     }
 
-    public void UpdateCountByRank(List<Card> selectedCards, List<Rank> rankList)
+    public List<int> UpdateCountByRank(List<Card> selectedCards, List<Rank> rankList)
     {
-        Count = new List<int>();
+        List<int> Count = new List<int>();
         for (int i = 0; i < selectedCards.Count; i++)
         {
             if (rankList.Contains(selectedCards[i].Rank))
@@ -345,6 +360,8 @@ public class CardManager : MonoBehaviour
                 Count.Add(i);
             }
         }
+
+        return Count;
     }
     
     bool isStraight(List<Card> sortedCards)
