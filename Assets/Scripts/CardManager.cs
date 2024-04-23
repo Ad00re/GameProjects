@@ -45,6 +45,7 @@ public class CardManager : MonoBehaviour
     public int scoringCardIndexInPlay=-1;
     
     public bool modified = false;
+    public bool sortByRank = true;
 
     [SerializeField] private GameObject cardPrefab;
     public int score;
@@ -109,10 +110,21 @@ public class CardManager : MonoBehaviour
         {
             DisplayCardView(Drawed, new Vector3(-2, -2, 0), Selected,CardsViewHand);
             modified = false;
+            //change the view of play
+            List<int> sortedIndexOfCard;
             DisplayCardView(Play,new Vector3(-2, 3, 0),new List<int>(),CardsViewPlay);
+            if (!sortByRank)
+            {
+                sortedIndexOfCard = Enumerable.Range(0, Play.Count).ToList();
+            }
+            else
+            {
+                sortedIndexOfCard = MapIndex(Play);
+            }
             for (int i = 0; i < Play.Count; i++)
             {
-                CardsViewPlay[i].GetComponent<CardDisplay>().scoreText.text = scoringCardIndexInPlay==i?CalculationCardScore(Cards[Play[scoringCardIndexInPlay]]).Item1.ToString():"";
+                int indexOfCard = sortedIndexOfCard[i];
+                CardsViewPlay[i].GetComponent<CardDisplay>().scoreText.text = scoringCardIndexInPlay==indexOfCard?CalculationCardScore(Cards[Play[scoringCardIndexInPlay]]).Item1.ToString():"";
             }
             scoreText.text = score.ToString();
             multiText.text = multi.ToString();
@@ -165,21 +177,33 @@ public class CardManager : MonoBehaviour
                 MarkDirty();
             }
         }
+        List<int> sortedIndexOfCard;
+        if (!sortByRank)
+        {
+            sortedIndexOfCard = Enumerable.Range(0, Play.Count).ToList();
+        }
+        else
+        {
+            sortedIndexOfCard = MapIndex(Play);
+        }
         //calculate score that count for play
         for (int i = 0; i < Play.Count; i++)
         {
+            int indexOfCard = sortedIndexOfCard[i];
             List<Card> playCards = Play.Select(j => Cards[j]).ToList();
             IndexOfCardCountInPlay = CalculateSelectedHand(playCards).Item2;
-            if (IndexOfCardCountInPlay.Contains(i))
+            if (IndexOfCardCountInPlay.Contains(indexOfCard))
             {
-                scoringCardIndexInPlay = i;
-                (int, int) cardScore = CalculationCardScore(Cards[Play[i]]);
+                scoringCardIndexInPlay = indexOfCard;
+                (int, int) cardScore = CalculationCardScore(Cards[Play[indexOfCard]]);
                 score += cardScore.Item1;
                 multi += cardScore.Item2;
             }
             MarkDirty();
             await UnityAsync.Await.Seconds(0.5f);
         }
+
+        scoringCardIndexInPlay = -1;
         //change round score
         roundScore += score * multi;
         MarkDirty();
@@ -195,6 +219,17 @@ public class CardManager : MonoBehaviour
         score =0;
         multi =0;
         hand = Hand.Nothing;
+    }
+
+    public void ButtonSortByRank()
+    {
+        sortByRank = true;
+        MarkDirty();
+    }
+    public void ButtonSortBySuit()
+    {
+        sortByRank = false;
+        MarkDirty();
     }
 
     public (int, int) CalculationCardScore(Card card)
@@ -215,6 +250,7 @@ public class CardManager : MonoBehaviour
     }
     void DisplayCardView(List<int> CardIndex, Vector3 bottomLeft, List<int> SelectedIndex,List<GameObject> CardsView)
     {
+        //add enough card instance
         for(int i = 0;i<CardIndex.Count;i++)
         {
             if (i >= CardsView.Count)
@@ -225,23 +261,78 @@ public class CardManager : MonoBehaviour
         }
         for (int i = 0; i < CardsView.Count; i++)
         {
+            
             GameObject card = CardsView[i];
             if (i >= CardIndex.Count)
             {
                 card.SetActive(false);
-                continue;
             }
-            card.transform.position= new Vector3(i,SelectedIndex.Contains(i)?2:0,0) + bottomLeft;
-            var cardDisplay = card.GetComponent<CardDisplay>();
-            cardDisplay.rankText.text = Cards[CardIndex[i]].Rank.ToString();
-            cardDisplay.suitText.text = Cards[CardIndex[i]].Suit.ToString();
-            card.SetActive(true);
-            cardDisplay.CardIndexInHand = i;
+        }
+        List<int> sortedIndexOfCard;
+        if (!sortByRank)
+        {
+            sortedIndexOfCard = Enumerable.Range(0, CardIndex.Count).ToList();
+        }
+        else
+        {
+            sortedIndexOfCard = MapIndex(CardIndex);
         }
         
+        for (int i = 0; i < CardIndex.Count; i++)
+        {
+            int indexInDrawed = sortedIndexOfCard[i];
+            GameObject card = CardsView[i];
+            card.transform.position= new Vector3(i,SelectedIndex.Contains(indexInDrawed)?2:0,0) + bottomLeft;
+            var cardDisplay = card.GetComponent<CardDisplay>();
+            cardDisplay.rankText.text = Cards[CardIndex[indexInDrawed]].Rank.ToString();
+            cardDisplay.suitText.text = Cards[CardIndex[indexInDrawed]].Suit.ToString();
+            card.SetActive(true);
+            cardDisplay.CardIndexInHand = indexInDrawed;
+        }
     }
-    
 
+
+    private class SortByRank : IComparer<int>
+    {
+        int IComparer<int>.Compare(int a, int b) //implement Compare
+        {              
+            if (a%13 > b%13)
+                return -1; //normally greater than = 1
+            if (a%13 < b%13)
+                return 1; // normally smaller than = -1
+            if (a > b)
+                return -1; //normally greater than = 1
+            if (a < b)
+                return 1;
+            return 0; // equal
+        }
+    }
+    public  List<int> MapIndex(List<int> indexes)
+    {
+       //want to display the 0,1,2,3,4 card, so we want to return the maped 0,1,2,3,4 index
+       //so that is, in the sort by suit, it is index 0, in the sort by rank, which index should it be
+       //first sort hand by rank
+
+       // Use LINQ OrderBy with your custom comparer
+       var sortedWithIndex = indexes.Select((value, index) => new { value, index })
+           .OrderBy(n => n.value, new SortByRank())
+           .ToList();
+
+       // Step 2: Create a dictionary for reverse lookup
+       Dictionary<int, int> indexMap = sortedWithIndex.Select((x, i) => new { originalIndex = x.index, newIndex = i })
+           .ToDictionary(x => x.newIndex, x => x.originalIndex);
+
+       // Step 3: Generate the result list directly using LINQ
+       List<int> result = Enumerable.Range(0, indexes.Count)
+           .Select(i => indexMap[i])
+           .ToList();
+       return result;
+
+
+
+
+
+    }        
     public void MarkDirty()
     {
         modified = true;
