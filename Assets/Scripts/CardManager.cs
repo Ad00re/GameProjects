@@ -51,10 +51,13 @@ public class CardManager : MonoBehaviour
     public int multi;
     public Hand hand;
     public int roundScore;
+    public int roundTarget;
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI multiText;
     public TextMeshProUGUI handText;
     public TextMeshProUGUI roundScoreText;
+    public TextMeshProUGUI roundTargetText;
+    
 
     public static CardManager Instance { get; private set; }
 
@@ -93,9 +96,8 @@ public class CardManager : MonoBehaviour
         multi = 0;
         roundScore = 0;
         hand = Hand.Nothing;
+        roundTarget = 300;
         
-
-
     }
 
     // Update is called once per frame
@@ -115,7 +117,8 @@ public class CardManager : MonoBehaviour
             scoreText.text = score.ToString();
             multiText.text = multi.ToString();
             handText.text = (hand == Hand.Nothing)?"":hand.ToString();
-           roundScoreText.text = roundScore.ToString();
+            roundScoreText.text = roundScore.ToString();
+            roundTargetText.text = roundTarget.ToString();
         }
         
     }
@@ -151,6 +154,7 @@ public class CardManager : MonoBehaviour
 
     public async void PlayCard()
     {
+        //move selected card to play
         for(int i = Drawed.Count-1; i>-1;i--)
         {
             if (Selected.Contains(i))
@@ -161,6 +165,7 @@ public class CardManager : MonoBehaviour
                 MarkDirty();
             }
         }
+        //calculate score that count for play
         for (int i = 0; i < Play.Count; i++)
         {
             List<Card> playCards = Play.Select(j => Cards[j]).ToList();
@@ -175,8 +180,21 @@ public class CardManager : MonoBehaviour
             MarkDirty();
             await UnityAsync.Await.Seconds(0.5f);
         }
+        //change round score
         roundScore += score * multi;
         MarkDirty();
+        //remove card in play 
+        await UnityAsync.Await.Seconds(2f);
+        for(int i = Play.Count-1; i>-1;i--)
+        {
+            Play.RemoveAt(i);
+            Selected.Remove(i);                
+            MarkDirty();
+            await UnityAsync.Await.Seconds(0.3f);
+        }
+        score =0;
+        multi =0;
+        hand = Hand.Nothing;
     }
 
     public (int, int) CalculationCardScore(Card card)
