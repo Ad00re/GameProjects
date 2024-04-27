@@ -135,6 +135,12 @@ public class CardManager : MonoBehaviour
         
     }
 
+    public void NextState()
+    {
+        StateManager.Instance.gameState = StateManager.GameState.shop;
+        StateManager.Instance.MarkDirty();
+    }
+
     public void DrawCard()
     {
         Debug.Log(Deck.Count);
@@ -152,6 +158,8 @@ public class CardManager : MonoBehaviour
 
     public async void DiscardCard()
     {
+        StateManager.Instance.discard -= 1;
+        StateManager.Instance.MarkDirty();
         for(int i = Drawed.Count-1; i>-1;i--)
         {
             if (Selected.Contains(i))
@@ -166,6 +174,8 @@ public class CardManager : MonoBehaviour
 
     public async void PlayCard()
     {
+        StateManager.Instance.hand -= 1;
+        StateManager.Instance.MarkDirty();
         //move selected card to play
         for(int i = Drawed.Count-1; i>-1;i--)
         {
@@ -255,7 +265,7 @@ public class CardManager : MonoBehaviour
         {
             if (i >= CardsView.Count)
             {
-                GameObject card = Instantiate(cardPrefab);
+                GameObject card = Instantiate(cardPrefab,StateManager.Instance.gameView.transform);
                 CardsView.Add(card);
             }
         }
