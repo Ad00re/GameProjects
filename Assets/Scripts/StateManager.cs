@@ -8,14 +8,20 @@ public class StateManager : MonoBehaviour
     // Start is called before the first frame update
     public enum GameState
     {
-        bind,game,shop
+        blind,game,shop
     }
 
+    public enum BlindState
+    {
+        small,big,boss
+    }
+    
     public GameState gameState;
+    public BlindState blindState;
     public bool modified;
     public GameObject gameView;
     public GameObject shopView;
-    public GameObject bindView;
+    public GameObject blindView;
     
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI chipText;
@@ -25,6 +31,7 @@ public class StateManager : MonoBehaviour
     public TextMeshProUGUI cashText;
 
     public int score;
+    public int roundTarget;
     public int chip;
     public int multi;
     public int hand;
@@ -46,9 +53,11 @@ public class StateManager : MonoBehaviour
     
     void Start()
     {
-        gameState = GameState.bind;
+        gameState = GameState.blind;
+        blindState = BlindState.small;
         cash = 0;
         modified = true;
+        roundTarget = 300;
     }
 
     // Update is called once per frame
@@ -64,21 +73,21 @@ public class StateManager : MonoBehaviour
             discardText.text = discard.ToString();
             cashText.text = cash.ToString();
             //check GameState, activate/deactivate game object
-            if (gameState == GameState.bind)
+            if (gameState == GameState.blind)
             {
-                bindView.SetActive(true);
+                blindView.SetActive(true);
                 gameView.SetActive(false);
                 shopView.SetActive(false);
             }
             else if (gameState == GameState.game)
             {
-                bindView.SetActive(false);
+                blindView.SetActive(false);
                 gameView.SetActive(true);
                 shopView.SetActive(false);
             }
             else if (gameState == GameState.shop)
             {
-                bindView.SetActive(false);
+                blindView.SetActive(false);
                 gameView.SetActive(false);
                 shopView.SetActive(true);
             }
@@ -99,7 +108,6 @@ public class StateManager : MonoBehaviour
         multi=0; 
         hand=4; 
         discard=4;
-        
     }
     
 }

@@ -74,12 +74,10 @@ public class CardManager : MonoBehaviour
         }
     }
 
-    async void Start()
+    void Start()
     {
         Cards = new List<Card>();
-        Deck = new List<int>();
-        Drawed = new List<int>();
-        Play = new List<int>();
+        
         foreach (Suit suit in System.Enum.GetValues(typeof(Suit)))
         {
             foreach (Rank rank in System.Enum.GetValues(typeof(Rank)))
@@ -88,17 +86,25 @@ public class CardManager : MonoBehaviour
             }
         }
 
+        SetDefault();
+        
+    }
+
+    public void SetDefault()
+    {
+        Deck = new List<int>();
+        Drawed = new List<int>();
+        Play = new List<int>();
         for (int i = 0; i < Cards.Count; i++)
         {
             Deck.Add(i);
         }
-
         score = 0;
         multi = 0;
         roundScore = 0;
         hand = Hand.Nothing;
-        roundTarget = 300;
-        
+        roundTarget = StateManager.Instance.roundTarget;
+        MarkDirty();
     }
 
     // Update is called once per frame
