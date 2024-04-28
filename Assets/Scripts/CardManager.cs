@@ -141,11 +141,7 @@ public class CardManager : MonoBehaviour
         
     }
 
-    public void NextState()
-    {
-        StateManager.Instance.gameState = StateManager.GameState.shop;
-        StateManager.Instance.MarkDirty();
-    }
+    
 
     public void DrawCard()
     {
@@ -235,11 +231,16 @@ public class CardManager : MonoBehaviour
         score =0;
         multi =0;
         hand = Hand.Nothing;
+        if (roundScore >= roundTarget)
+        {
+            StateManager.Instance.gameState = StateManager.GameState.cash;
+            StateManager.Instance.MarkDirty();
+        }
     }
 
     public void ButtonSortByRank()
     {
-        sortByRank = true;
+        sortByRank = true; 
         MarkDirty();
     }
     public void ButtonSortBySuit()

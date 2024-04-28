@@ -8,7 +8,7 @@ public class StateManager : MonoBehaviour
     // Start is called before the first frame update
     public enum GameState
     {
-        blind,game,shop
+        blind,game,cash,shop
     }
 
     public enum BlindState
@@ -22,6 +22,7 @@ public class StateManager : MonoBehaviour
     public GameObject gameView;
     public GameObject shopView;
     public GameObject blindView;
+    public GameObject cashView;
     
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI chipText;
@@ -77,18 +78,28 @@ public class StateManager : MonoBehaviour
             {
                 blindView.SetActive(true);
                 gameView.SetActive(false);
+                cashView.SetActive(false);
                 shopView.SetActive(false);
             }
             else if (gameState == GameState.game)
             {
                 blindView.SetActive(false);
                 gameView.SetActive(true);
+                cashView.SetActive(false);
+                shopView.SetActive(false);
+            }
+            else if (gameState == GameState.cash)
+            {
+                blindView.SetActive(false);
+                gameView.SetActive(false);
+                cashView.SetActive(true);
                 shopView.SetActive(false);
             }
             else if (gameState == GameState.shop)
             {
                 blindView.SetActive(false);
                 gameView.SetActive(false);
+                cashView.SetActive(false);
                 shopView.SetActive(true);
             }
             

@@ -39,6 +39,8 @@ public class GameManager : MonoBehaviour
         {
             StateManager.Instance.blindState = StateManager.BlindState.small;
         }
+
+        StateManager.Instance.roundTarget *= 2;
         StateManager.Instance.MarkDirty();
 
 
