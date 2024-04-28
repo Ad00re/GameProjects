@@ -22,6 +22,7 @@ public class GameManager : MonoBehaviour
     {
         StateManager.Instance.gameState = StateManager.GameState.game;
         StateManager.Instance.SetDefault();
+        CardManager.Instance.SetDefault();
         StateManager.Instance.MarkDirty();
     }
     

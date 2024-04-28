@@ -113,6 +113,7 @@ public class CardManager : MonoBehaviour
         }
 
         SetDefault();
+        
     
     }
 
@@ -131,6 +132,7 @@ public class CardManager : MonoBehaviour
         roundScore = 0;
         hand = Hand.Nothing;
         roundTarget = StateManager.Instance.roundTarget;
+        DrawCard();
         MarkDirty();
     }
 
@@ -158,6 +160,8 @@ public class CardManager : MonoBehaviour
             {
                 int indexOfCard = sortedIndexOfCard[i];
                 CardsViewPlay[i].GetComponent<CardDisplay>().scoreText.text = scoringCardIndexInPlay==indexOfCard?CalculationCardScore(Cards[Play[scoringCardIndexInPlay]]).Item1.ToString():"";
+                Debug.Log(CardsViewPlay[i].GetComponent<CardDisplay>().scoreText.text);
+                
             }
             scoreText.text = score.ToString();
             multiText.text = multi.ToString();
@@ -199,6 +203,7 @@ public class CardManager : MonoBehaviour
                 await UnityAsync.Await.Seconds(0.3f);
             }
         }
+        DrawCard();
     }
 
     public async void PlayCard()
@@ -239,7 +244,7 @@ public class CardManager : MonoBehaviour
                 multi += cardScore.Item2;
             }
             MarkDirty();
-            await UnityAsync.Await.Seconds(0.5f);
+            await UnityAsync.Await.Seconds(1.5f);
         }
 
         scoringCardIndexInPlay = -1;
@@ -262,6 +267,10 @@ public class CardManager : MonoBehaviour
         {
             StateManager.Instance.gameState = StateManager.GameState.cash;
             StateManager.Instance.MarkDirty();
+        }
+        else
+        {
+            DrawCard();
         }
     }
 
