@@ -5,6 +5,7 @@ using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityAsync;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -37,6 +38,7 @@ public class Card
 public class CardManager : MonoBehaviour
 {
     public List<Card> Cards;
+    public List<Sprite> cardImages;
     public List<int> Deck;
     public List<int> Drawed;
     public List<int> Play;
@@ -77,18 +79,43 @@ public class CardManager : MonoBehaviour
     void Start()
     {
         Cards = new List<Card>();
-        
+        cardImages = new List<Sprite>();
+    
         foreach (Suit suit in System.Enum.GetValues(typeof(Suit)))
         {
             foreach (Rank rank in System.Enum.GetValues(typeof(Rank)))
             {
                 Cards.Add(new Card(suit,rank));
+                String fileName = "Assets/Images/Card/card";
+                fileName += suit;
+                switch (rank)
+                {
+                    case Rank.Jack:
+                        fileName += "J";
+                        break;
+                    case Rank.Queen:
+                        fileName += "Q";
+                        break;
+                    case Rank.King:
+                        fileName += "K";
+                        break;
+                    case Rank.Ace:
+                        fileName += "A";
+                        break;
+                    default:
+                        fileName += ((int)rank).ToString();
+                        break;
+                }
+                fileName += ".png";
+                cardImages.Add(AssetDatabase.LoadAssetAtPath<Sprite>(fileName));
+
             }
         }
 
         SetDefault();
-        
+    
     }
+
 
     public void SetDefault()
     {
@@ -303,6 +330,10 @@ public class CardManager : MonoBehaviour
             var cardDisplay = card.GetComponent<CardDisplay>();
             cardDisplay.rankText.text = Cards[CardIndex[indexInDrawed]].Rank.ToString();
             cardDisplay.suitText.text = Cards[CardIndex[indexInDrawed]].Suit.ToString();
+            Sprite image = cardImages[CardIndex[indexInDrawed]];
+            card.GetComponent<SpriteRenderer>().sprite = image;
+            card.transform.localScale = new Vector3(108f / image.rect.size.x,
+                108f*1.5f / image.rect.size.y, 1f);
             card.SetActive(true);
             cardDisplay.CardIndexInHand = indexInDrawed;
         }
